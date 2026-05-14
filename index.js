@@ -21,12 +21,20 @@ getUsers().then(data => {
             color = `rgb(${x*20}, ${x*20}, 0)`;
         }
 
-        // Mark on the map
+        // Mark on the map with interactive popup
+        let popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
+            `<h3>${item.country}</h3><p>Cases/M: ${cases}<br>Tests/M: ${item.testsPerOneMillion}<br>Ratio: ${x.toFixed(1)}</p>`
+        );
         new mapboxgl.Marker({
             draggable: false,
             color: color
         }).setLngLat([longitude, latitude])
+            .setPopup(popup)
             .addTo(map);
     })
 
+    pendo.track('covid_data_loaded', { countriesCount: data.length });
+
+}).catch(function(err) {
+    pendo.track('covid_data_load_failed', { error: err.message });
 });
