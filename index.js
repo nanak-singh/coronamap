@@ -1,8 +1,6 @@
-var fetchStartTime;
 var apiEndpoint = 'https://corona.lmao.ninja/v2/countries?sort=cases';
 
 async function getUsers() {
-    fetchStartTime = Date.now();
     let response = await fetch(apiEndpoint);
     let data = await response.json()
     console.log(data);
@@ -10,7 +8,6 @@ async function getUsers() {
 }
 
 getUsers().then(data => {
-    var hasErrors = false;
     data.forEach(item => {
         console.log(item.country, item.countryInfo.long, item.countryInfo.lat)
         let latitude = item.countryInfo.lat;
@@ -36,22 +33,12 @@ getUsers().then(data => {
 
     // Track successful COVID data load and map marker rendering
     if (typeof pendo !== 'undefined') {
-        pendo.track("covid_data_loaded", {
-            countriesCount: data.length,
-            fetchDurationMs: Date.now() - fetchStartTime,
-            apiEndpoint: apiEndpoint,
-            hasErrors: hasErrors
-        });
+        pendo.track("covid_data_loaded", { countriesCount: data.length });
     }
 
 }).catch(function(err) {
     // Track failed data load
     if (typeof pendo !== 'undefined') {
-        pendo.track("covid_data_loaded", {
-            countriesCount: 0,
-            fetchDurationMs: Date.now() - fetchStartTime,
-            apiEndpoint: apiEndpoint,
-            hasErrors: true
-        });
+        pendo.track("covid_data_load_failed", { error: err.message });
     }
 });
