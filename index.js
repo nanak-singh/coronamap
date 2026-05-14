@@ -8,32 +8,39 @@ async function getUsers() {
 }
 
 getUsers().then(data => {
-    data.forEach(item => {
-        console.log(item.country, item.countryInfo.long, item.countryInfo.lat)
-        let latitude = item.countryInfo.lat;
-        let longitude = item.countryInfo.long;
+    try {
+        data.forEach(item => {
+            console.log(item.country, item.countryInfo.long, item.countryInfo.lat)
+            let latitude = item.countryInfo.lat;
+            let longitude = item.countryInfo.long;
 
-        let cases = item.casesPerOneMillion;
-        let x = item.testsPerOneMillion/cases;
-        if (item.testsPerOneMillion/cases > 25) {
-            color = "rgb(255, 0, 0)";
+            let cases = item.casesPerOneMillion;
+            let x = item.testsPerOneMillion/cases;
+            if (item.testsPerOneMillion/cases > 25) {
+                color = "rgb(255, 0, 0)";
+            }
+
+            else {
+                color = `rgb(${x*20}, ${x*20}, 0)`;
+            }
+
+            // Mark on the map
+            new mapboxgl.Marker({
+                draggable: false,
+                color: color
+            }).setLngLat([longitude, latitude])
+                .addTo(map);
+        })
+
+        // Track successful COVID data load and map marker rendering
+        if (typeof pendo !== 'undefined') {
+            pendo.track("covid_data_loaded", { countriesCount: data.length });
         }
-
-        else {
-            color = `rgb(${x*20}, ${x*20}, 0)`;
+    } catch (err) {
+        // Track marker rendering failures
+        if (typeof pendo !== 'undefined') {
+            pendo.track("covid_data_load_failed", { error: err.message });
         }
-
-        // Mark on the map
-        new mapboxgl.Marker({
-            draggable: false,
-            color: color
-        }).setLngLat([longitude, latitude])
-            .addTo(map);
-    })
-
-    // Track successful COVID data load and map marker rendering
-    if (typeof pendo !== 'undefined') {
-        pendo.track("covid_data_loaded", { countriesCount: data.length });
     }
 
 }).catch(function(err) {
