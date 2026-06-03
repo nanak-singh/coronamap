@@ -1,5 +1,8 @@
 async function getUsers() {
     let response = await fetch('https://corona.lmao.ninja/v2/countries?sort=cases');
+    if (!response.ok) {
+        throw new Error('HTTP ' + response.status);
+    }
     let data = await response.json()
     console.log(data);
     return data;
@@ -29,4 +32,12 @@ getUsers().then(data => {
             .addTo(map);
     })
 
+    pendo.track('covid_data_loaded', {
+        countriesCount: data.length
+    });
+}).catch(error => {
+    pendo.track('covid_data_load_failed', {
+        errorMessage: error.message,
+        errorType: error.name
+    });
 });
