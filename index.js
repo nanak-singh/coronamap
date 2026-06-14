@@ -1,5 +1,6 @@
 async function getUsers() {
-    let response = await fetch('https://corona.lmao.ninja/v2/countries?sort=cases');
+    let response = await fetch('https://disease.sh/v3/covid-19/countries?sort=cases');
+    if (!response.ok) throw new Error('API returned ' + response.status);
     let data = await response.json()
     console.log(data);
     return data;
@@ -13,6 +14,7 @@ getUsers().then(data => {
 
         let cases = item.casesPerOneMillion;
         let x = item.testsPerOneMillion/cases;
+        let color;
         if (item.testsPerOneMillion/cases > 25) {
             color = "rgb(255, 0, 0)";
         }
@@ -29,4 +31,8 @@ getUsers().then(data => {
             .addTo(map);
     })
 
+    pendo.track('covid_data_loaded', { countriesCount: data.length });
+}).catch(error => {
+    document.getElementById('map').innerHTML = '<div style="color:white;text-align:center;padding-top:45vh;">Unable to load COVID-19 data. Please try again later.</div>';
+    pendo.track('covid_data_load_failed', { errorMessage: error.message, errorType: error.name });
 });
