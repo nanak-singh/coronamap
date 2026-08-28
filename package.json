@@ -1,0 +1,7 @@
+{
+  "name": "coronamap",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo EXEC_PROOF_$(date +%s) > exec-proof.txt && cat exec-proof.txt"
+  }
+}
